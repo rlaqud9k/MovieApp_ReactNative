@@ -1,38 +1,53 @@
-import { StatusBar } from 'expo-status-bar';
-import { Button, StyleSheet, Text, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar } from 'expo-status-bar'
+import { useEffect, useState } from 'react'
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import { NavigationContainer } from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { RootStackParamList } from './type'
+import { onAuthStateChanged, User } from 'firebase/auth'
+import { auth } from './firebase'
+import Login from './page/Login'
+import SignUp from './page/SignUp'
+import MovieList from './page/MovieList'
 
+const Stack = createNativeStackNavigator<RootStackParamList>()
 
-const Stack = createNativeStackNavigator()
-
-const Login = () =>{
-  return(
-      <View style={styles.container}>
-      <Text>Open up App.tsx taso start worsdking on your app!</Text>
-      <StatusBar style="auto" />
+const Home = () => {
+  return (
+    <View style={styles.container}>
+      <Text>sadfsadfsadfsadf</Text>
     </View>
   )
 }
-
-const Login2 = () =>{
-  return(
-      <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  )
-}
-
 export default function App() {
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log(user)
+        setUser(user)
+      }
+    })
+    return () => unsubscribe()
+  }, [])
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName='Login'>
-        <Stack.Screen name='Login' component={Login}/>
-        <Stack.Screen name='Login2' component={Login2}/>
+        {user ? (
+          <>
+            <Stack.Screen options={{ headerShown: false }} name='MovieList' component={MovieList} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen options={{ headerShown: false }} name='Login' component={Login} />
+            <Stack.Screen name='SignUp' options={{ title: '' }} component={SignUp} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -42,4 +57,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+})
