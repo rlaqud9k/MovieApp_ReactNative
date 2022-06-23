@@ -16,6 +16,8 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "bundleIdentifier": "com.kim.reactNativeTutorial",
+      "buildNumber": "1.0.0",
       "supportsTablet": true
     },
     "android": {

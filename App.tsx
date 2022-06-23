@@ -1,6 +1,5 @@
-import { StatusBar } from 'expo-status-bar'
-import { useEffect, useState } from 'react'
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import { useLayoutEffect, useState } from 'react'
+import { StyleSheet, Text, View } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { RootStackParamList } from './type'
@@ -9,6 +8,10 @@ import { auth } from './firebase'
 import Login from './page/Login'
 import SignUp from './page/SignUp'
 import MovieList from './page/MovieList'
+import Axios from 'axios'
+import MovieDetail from './page/MovieDetail'
+
+export const axios = Axios.create({})
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
@@ -22,10 +25,10 @@ const Home = () => {
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log(user)
+        console.log(user == null, "user is null")
         setUser(user)
       }
     })
@@ -34,15 +37,16 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='Login'>
-        {user ? (
-          <>
-            <Stack.Screen options={{ headerShown: false }} name='MovieList' component={MovieList} />
-          </>
-        ) : (
+      <Stack.Navigator>
+        {user == null ? (
           <>
             <Stack.Screen options={{ headerShown: false }} name='Login' component={Login} />
             <Stack.Screen name='SignUp' options={{ title: '' }} component={SignUp} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen options={{ title: '映画一覧' }} name='MovieList' component={MovieList} />
+            <Stack.Screen options={{ title: '映画詳細' }} name='MovieDetail' component={MovieDetail} />
           </>
         )}
       </Stack.Navigator>

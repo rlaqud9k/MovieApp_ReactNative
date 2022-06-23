@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   TouchableOpacity,
   StyleSheet,
@@ -11,16 +11,16 @@ import {
   Keyboard,
   Platform,
 } from 'react-native'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../firebase'
-import { useIsFocused, useNavigation } from '@react-navigation/native'
+import { useIsFocused } from '@react-navigation/native'
 import { Props } from '../type'
 import { firebaseAuthError } from '../Error'
 
 const SignUp = ({ navigation, route }: Props) => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [error, setError] = useState<string>('')
   const isFocused = useIsFocused()
 
   const handleRegister = async () => {
@@ -33,9 +33,11 @@ const SignUp = ({ navigation, route }: Props) => {
   }
 
   useEffect(() => {
-    setEmail('')
-    setPassword('')
-    setError('')
+    if (!isFocused) {
+      setEmail('')
+      setPassword('')
+      setError('')
+    }
   }, [isFocused])
 
   return (

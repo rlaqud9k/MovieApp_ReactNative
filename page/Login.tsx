@@ -11,16 +11,16 @@ import {
   Keyboard,
   Platform,
 } from 'react-native'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import {  signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../firebase'
-import { useIsFocused, useNavigation } from '@react-navigation/native'
+import { useIsFocused } from '@react-navigation/native'
 import { Props } from '../type'
 import { firebaseAuthError } from '../Error'
 const Login = ({ navigation, route }: Props) => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [keyboardStatus, setKeyboardStatus] = useState(false)
-  const [error, setError] = useState('')
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [keyboardStatus, setKeyboardStatus] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
   const isFocused = useIsFocused()
 
   const handleLogin = async () => {
@@ -32,9 +32,11 @@ const Login = ({ navigation, route }: Props) => {
   }
 
   useEffect(() => {
-    setEmail('')
-    setPassword('')
-    setError('')
+    if (!isFocused) {
+      setEmail('')
+      setPassword('')
+      setError('')
+    }
   }, [isFocused])
 
   useEffect(() => {

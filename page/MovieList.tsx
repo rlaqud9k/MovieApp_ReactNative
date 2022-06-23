@@ -1,103 +1,64 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect,useLayoutEffect,useState } from 'react'
 import {
-  TouchableOpacity,
   StyleSheet,
   Text,
-  View,
-  TextInput,
   SafeAreaView,
-  KeyboardAvoidingView,
-  ScrollView,
-  Keyboard,
-  Platform,
+  FlatList,
 } from 'react-native'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../firebase'
-import { useIsFocused, useNavigation } from '@react-navigation/native'
-import { Props } from '../type'
-import { firebaseAuthError } from '../Error'
+import { useIsFocused } from '@react-navigation/native'
+import { Movie, Props } from '../type'
+import { axios } from '../App'
+import ImageVIew from '../component/movieList/ImageView'
 
 const MovieList = ({ navigation, route }: Props) => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [keyboardStatus, setKeyboardStatus] = useState(false)
-  const [error, setError] = useState('')
+  const [movies, setMovies] = useState<Array<Movie>>([])
+  const [page, setPage] = useState<number>(1)
   const isFocused = useIsFocused()
 
-  const handleLogin = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password)
-    } catch (error: any) {
-      setError(firebaseAuthError(error.code))
+  useLayoutEffect(() => {
+    if (isFocused) {
+      axios
+        .get(
+          `https://api.themoviedb.org/3/movie/popular?language=ja&api_key=adeb7231584e29872bef9934bfd3a813&page=${page}`,
+        )
+        .then((result) => {
+          let oldmovies: Array<Movie> = movies
+          let fetchMovies: Array<Movie> = result.data.results
+
+          fetchMovies.map((movie) => oldmovies.push(movie))
+
+          setMovies(oldmovies)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }else{
+        setMovies([])
+        setPage(1)
     }
-  }
+  }, [isFocused, page])
 
-  useEffect(() => {
-    setEmail('')
-    setPassword('')
-    setError('')
-  }, [isFocused])
 
-  useEffect(() => {
-    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
-      setKeyboardStatus(true)
-    })
-    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardStatus(false)
-    })
-
-    return () => {
-      showSubscription.remove()
-      hideSubscription.remove()
-    }
-  }, [])
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={[
-          styles.keyboardAvoidingVeiw,
-          { justifyContent: keyboardStatus ? 'flex-end' : 'center' },
-        ]}
-        enabled
-        behavior={Platform.OS == 'ios' ? 'position' : 'height'}
-      >
-        <ScrollView>
-          <View style={styles.itemContainer}>
-            <Text style={styles.title}>{'Login'}</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                placeholder='メールを入力してください。'
-                style={styles.input}
-                onChangeText={setEmail}
-                value={email}
-              />
-              <TextInput
-                placeholder='パスワードを入力してください。'
-                secureTextEntry
-                style={styles.input}
-                onChangeText={setPassword}
-                value={password}
-              />
-              <Text style={styles.error}>{error}</Text>
-            </View>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, styles.authButtonColor]}
-                onPress={handleLogin}
-              >
-                <Text style={styles.buttonText}>{'ログイン'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('SignUp')}
-                style={[styles.button, styles.signUpButtonColor]}
-              >
-                <Text style={styles.buttonText}>{'会員登録はこちら'}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      <FlatList
+        data={movies}
+        numColumns={2}
+        keyExtractor={(item, index) => String(item.id + index)}
+        showsVerticalScrollIndicator={false}
+        onEndReachedThreshold={0.05}
+        onEndReached={({ distanceFromEnd }) => {
+        console.log("연타")
+          setPage(page + 1)
+        }}
+        ListEmptyComponent={() => {
+          return <Text>{'少々お待ちください。'}</Text>
+        }}
+        renderItem={({ item }) => {
+          return <ImageVIew  movie={item} navigation={navigation} route={route}  />
+        }}
+      />
     </SafeAreaView>
   )
 }
@@ -107,49 +68,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  keyboardAvoidingVeiw: { flex: 1, flexDirection: 'column' },
-  itemContainer: {
-    flex: 1,
-    paddingHorizontal: '10%',
-    alignItems: 'center',
-  },
-  title: { paddingVertical: '10%', fontSize: 50, marginTop: '20%' },
-  input: {
-    height: 50,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-  },
-  error: {
-    marginHorizontal: 12,
-    padding: 10,
-    color: 'red',
-  },
-  inputContainer: {
-    width: '100%',
-  },
-  buttonContainer: {
-    width: '100%',
-    paddingVertical: '20%',
-  },
-  button: {
-    padding: 20,
-    marginHorizontal: 12,
-    marginVertical: 5,
-    borderRadius: 5,
-  },
-  authButtonColor: {
-    backgroundColor: '#3cb371',
-  },
-  signUpButtonColor: {
-    backgroundColor: '#66cdaa',
-  },
-  buttonText: {
-    fontSize: 20,
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
 })
 
-export default Login
+export default MovieList
