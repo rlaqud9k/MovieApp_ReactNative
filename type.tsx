@@ -5,6 +5,7 @@ export type RootStackParamList = {
   SignUp: undefined
   MovieList: undefined
   MovieDetail: { movie: Movie }
+  Favorites: undefined
 }
 
 export type Props = NativeStackScreenProps<RootStackParamList, 'MovieDetail'>
@@ -17,14 +18,14 @@ export type Movie = {
   profile_path?: string
 }
 
-type NavigationProps = Props['navigation'];
+type NavigationProps = Props['navigation']
 
-type RouteProps = Props['route'];
+type RouteProps = Props['route']
 
 export interface ListImageViewProps {
-    movie: Movie
-    navigation: NavigationProps
-    route: RouteProps
+  movie: Movie
+  navigation: NavigationProps
+  route: RouteProps
 }
 
 export interface DetailImageViewProps {

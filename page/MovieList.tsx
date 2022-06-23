@@ -1,19 +1,17 @@
-import { useEffect,useLayoutEffect,useState } from 'react'
-import {
-  StyleSheet,
-  Text,
-  SafeAreaView,
-  FlatList,
-} from 'react-native'
+import { useContext, useEffect, useLayoutEffect, useState } from 'react'
+import { StyleSheet, Text, SafeAreaView, FlatList, TouchableOpacity } from 'react-native'
 import { useIsFocused } from '@react-navigation/native'
 import { Movie, Props } from '../type'
-import { axios } from '../App'
+import { axios, UserInfoContext } from '../App'
 import ImageVIew from '../component/movieList/ImageView'
+import { auth } from '../firebase'
+import { signOut } from 'firebase/auth'
 
 const MovieList = ({ navigation, route }: Props) => {
   const [movies, setMovies] = useState<Array<Movie>>([])
   const [page, setPage] = useState<number>(1)
   const isFocused = useIsFocused()
+  const userInfoContext = useContext(UserInfoContext)
 
   useLayoutEffect(() => {
     if (isFocused) {
@@ -32,13 +30,40 @@ const MovieList = ({ navigation, route }: Props) => {
         .catch((error) => {
           console.log(error)
         })
-    }else{
-        setMovies([])
-        setPage(1)
+    } else {
+      setMovies([])
+      setPage(1)
     }
   }, [isFocused, page])
 
+  const handleSignOut = () => {
+    signOut(auth)
+      .then(() => {
+        userInfoContext.setUser(null)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Favorites')
+          }}
+        >
+          <Text>お気に入り</Text>
+        </TouchableOpacity>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity onPress={handleSignOut}>
+          <Text>ログアウト</Text>
+        </TouchableOpacity>
+      ),
+    })
+  }, [])
 
   return (
     <SafeAreaView style={styles.container}>
@@ -49,14 +74,13 @@ const MovieList = ({ navigation, route }: Props) => {
         showsVerticalScrollIndicator={false}
         onEndReachedThreshold={0.05}
         onEndReached={({ distanceFromEnd }) => {
-        console.log("연타")
           setPage(page + 1)
         }}
         ListEmptyComponent={() => {
           return <Text>{'少々お待ちください。'}</Text>
         }}
         renderItem={({ item }) => {
-          return <ImageVIew  movie={item} navigation={navigation} route={route}  />
+          return <ImageVIew movie={item} navigation={navigation} route={route} />
         }}
       />
     </SafeAreaView>

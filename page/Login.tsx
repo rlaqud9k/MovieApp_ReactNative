@@ -11,7 +11,7 @@ import {
   Keyboard,
   Platform,
 } from 'react-native'
-import {  signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../firebase'
 import { useIsFocused } from '@react-navigation/native'
 import { Props } from '../type'

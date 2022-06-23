@@ -26,7 +26,6 @@ const SignUp = ({ navigation, route }: Props) => {
   const handleRegister = async () => {
     try {
       const user = await createUserWithEmailAndPassword(auth, email, password)
-      navigation.goBack()
     } catch (error: any) {
       setError(firebaseAuthError(error.code))
     }
